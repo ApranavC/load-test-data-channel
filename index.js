@@ -56,7 +56,7 @@ async function handleManualJoin() {
     } else {
         // Create new meeting via API
         try {
-            const res = await fetch("https://api.videosdk.live/v2/rooms", {
+            const res = await fetch("https://api.classplus-dev.videosdk.live/v2/rooms", {
                 method: "POST",
                 headers: { Authorization: TOKEN, "Content-Type": "application/json" },
             });
@@ -89,6 +89,7 @@ function startMeeting(token, meetingId) {
         name: "LoadTestBot-" + Math.floor(Math.random() * 9000 + 1000),
         micEnabled: false,
         webcamEnabled: false,
+        signalingBaseUrl: "api.classplus-dev.videosdk.live"
     });
 
     meeting.join();
