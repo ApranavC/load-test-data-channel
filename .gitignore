@@ -1,0 +1,6 @@
+# config.js — local development token fallback
+# This file is gitignored to protect your token.
+# It is loaded by index.html only for local use.
+# On Vercel, pass ?token=YOUR_TOKEN in the URL instead.
+
+config.js

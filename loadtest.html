@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>VideoSDK Load Test</title>
+</head>
+
+<body>
+    <h1>VideoSDK DataStream Load Test</h1>
+
+    <div id="status-section">
+        <p>Status: <strong><span id="status">Initializing...</span></strong></p>
+        <p>Meeting ID: <span id="meetingIdDisplay">-</span></p>
+        <p>Send Frequency: <span id="freqDisplay">-</span> ms</p>
+    </div>
+
+    <div id="stats-section">
+        <h3>Live Stats</h3>
+        <table>
+            <tr>
+                <td>Messages Recv/s:</td>
+                <td><strong><span id="msgPerSec">0</span></strong></td>
+            </tr>
+            <tr>
+                <td>Total Messages Recv:</td>
+                <td><strong><span id="totalMsgRecv">0</span></strong></td>
+            </tr>
+            <tr>
+                <td>Bytes Recv/s:</td>
+                <td><strong><span id="bytesPerSec">0</span></strong></td>
+            </tr>
+            <tr>
+                <td>Total Bytes Recv:</td>
+                <td><strong><span id="totalBytesRecv">0</span></strong></td>
+            </tr>
+            <tr>
+                <td>Participants:</td>
+                <td><strong><span id="participantCount">0</span></strong></td>
+            </tr>
+            <tr>
+                <td>CPU Usage (%):</td>
+                <td><strong><span id="cpuUsage">N/A</span></strong></td>
+            </tr>
+            <tr>
+                <td>Messages Sent:</td>
+                <td><strong><span id="totalMsgSent">0</span></strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="log-section">
+        <h3>Log</h3>
+        <div id="logOutput" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; font-family: monospace; font-size: 12px; padding: 4px;"></div>
+    </div>
+
+    <script src="https://sdk.videosdk.live/js-sdk/0.6.0/videosdk.js"></script>
+    <script src="loadtest.js"></script>
+</body>
+
+</html>

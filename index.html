@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>VideoSDK DataStream Load Test</title>
+</head>
+
+<body>
+    <h1>VideoSDK DataStream Load Test</h1>
+
+    <!-- Shown when no meetingId/token in URL -->
+    <div id="join-screen" style="display:none">
+        <input type="text" id="tokenInput" placeholder="Paste Token" style="width:400px" />
+        <br><br>
+        <input type="text" id="meetingIdInput" placeholder="Meeting ID (leave blank to create)" />
+        <input type="number" id="freqInput" placeholder="Send freq ms (optional)" />
+        <br><br>
+        <button onclick="handleManualJoin()">Join / Create Meeting</button>
+    </div>
+
+    <!-- Shown once in meeting -->
+    <div id="grid-screen" style="display:none">
+        <p>Status: <strong><span id="status">-</span></strong></p>
+        <p>Meeting ID: <span id="meetingIdDisplay">-</span> &nbsp;|&nbsp; Send Freq: <span id="freqDisplay">-</span></p>
+
+        <h3>Live Stats</h3>
+        <table>
+            <tr><td>Messages Recv/s:</td><td><strong><span id="msgPerSec">0</span></strong></td></tr>
+            <tr><td>Total Messages Recv:</td><td><strong><span id="totalMsgRecv">0</span></strong></td></tr>
+            <tr><td>Bytes Recv/s:</td><td><strong><span id="bytesPerSec">0</span></strong></td></tr>
+            <tr><td>Total Bytes Recv:</td><td><strong><span id="totalBytesRecv">0</span></strong></td></tr>
+            <tr><td>Participants:</td><td><strong><span id="participantCount">0</span></strong></td></tr>
+            <tr><td>CPU Usage (%):</td><td><strong><span id="cpuUsage">-</span></strong></td></tr>
+            <tr><td>Messages Sent:</td><td><strong><span id="totalMsgSent">0</span></strong></td></tr>
+        </table>
+
+        <h3>Chat</h3>
+        <div id="chatMessages" style="height:200px;overflow-y:scroll;border:1px solid #ccc;margin-bottom:8px;padding:4px"></div>
+        <input type="text" id="chatInput" placeholder="Type a message..." />
+        <button onclick="sendChatMessage()">Send</button>
+
+        <h3>Log</h3>
+        <div id="logOutput" style="height:200px;overflow-y:scroll;border:1px solid #ccc;font-family:monospace;font-size:12px;padding:4px"></div>
+    </div>
+
+    <script src="https://sdk.videosdk.live/js-sdk/0.6.0/videosdk.js"></script>
+    <!-- config.js is gitignored and used for local dev only. Set window.TOKEN there. -->
+    <!-- On Vercel / CI, pass ?token=... in the URL instead. -->
+    <script>window.TOKEN = '';</script>
+    <script src="config.js" onerror="console.info('config.js not found — using URL param token')"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>
