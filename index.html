@@ -3,6 +3,107 @@
 
 <head>
     <title>VideoSDK DataStream Load Test</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { font-weight: 800; letter-spacing: -0.025em; margin-bottom: 24px; color: var(--primary); }
+        h3 { font-weight: 700; margin-top: 32px; border-bottom: 2px solid var(--border); padding-bottom: 8px; width: 100%; max-width: 800px; }
+        
+        #grid-screen, #join-screen {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        .stat-value { font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .msg-item {
+            animation: fadeInUp 0.3s ease-out forwards;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .msg-item:last-child { border-bottom: none; }
+        
+        #chatMessages, #logOutput {
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+
+        input {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--primary); }
+        
+        button {
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #eff6ff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .header-info span { color: var(--text); font-weight: 700; }
+    </style>
 </head>
 
 <body>
@@ -20,19 +121,43 @@
 
     <!-- Shown once in meeting -->
     <div id="grid-screen" style="display:none">
-        <p>Status: <strong><span id="status">-</span></strong></p>
-        <p>Meeting ID: <span id="meetingIdDisplay">-</span> &nbsp;|&nbsp; Send Freq: <span id="freqDisplay">-</span></p>
+        <div class="header-info">
+            <div>Status: <strong><span id="status" style="color:var(--primary)">-</span></strong></div>
+            <div>Meeting ID: <span id="meetingIdDisplay">-</span></div>
+            <div>Send Freq: <span id="freqDisplay">-</span></div>
+            <div>Messages: <span id="showMessagesDisplay">-</span></div>
+        </div>
 
-        <h3>Live Stats</h3>
-        <table>
-            <tr><td>Messages Recv/s:</td><td><strong><span id="msgPerSec">0</span></strong></td></tr>
-            <tr><td>Total Messages Recv:</td><td><strong><span id="totalMsgRecv">0</span></strong></td></tr>
-            <tr><td>Bytes Recv/s:</td><td><strong><span id="bytesPerSec">0</span></strong></td></tr>
-            <tr><td>Total Bytes Recv:</td><td><strong><span id="totalBytesRecv">0</span></strong></td></tr>
-            <tr><td>Participants:</td><td><strong><span id="participantCount">0</span></strong></td></tr>
-            <tr><td>CPU Usage (%):</td><td><strong><span id="cpuUsage">-</span></strong></td></tr>
-            <tr><td>Messages Sent:</td><td><strong><span id="totalMsgSent">0</span></strong></td></tr>
-        </table>
+        <h3>Live Throughput</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Messages Recv/s</div>
+                <div class="stat-value" id="msgPerSec">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Recv</div>
+                <div class="stat-value" id="totalMsgRecv">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Bytes/s</div>
+                <div class="stat-value" id="bytesPerSec">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Data</div>
+                <div class="stat-value">~<span id="totalBytesRecv">0</span> B</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Participants</div>
+                <div class="stat-value" id="participantCount">1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">CPU Usage</div>
+                <div class="stat-value" id="cpuUsage">-</div>
+            </div>
+        </div>
+        <div style="margin-bottom: 20px; font-size: 13px; color: var(--text-muted);">
+            Messages Sent: <strong id="totalMsgSent">0</strong>
+        </div>
 
         <h3>Chat</h3>
         <div id="chatMessages" style="height:200px;overflow-y:scroll;border:1px solid #ccc;margin-bottom:8px;padding:4px"></div>

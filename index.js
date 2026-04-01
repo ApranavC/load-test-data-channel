@@ -4,6 +4,7 @@ const params = new URLSearchParams(window.location.search);
 let TOKEN = params.get("token") || window.TOKEN || null;
 let MEETING_ID = params.get("meetingId");
 let FREQ = params.has("freq") ? parseInt(params.get("freq"), 10) : null; // null = observe only
+let SHOW_MESSAGES = params.get("showMessages") === "true"; // default false for performance
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let meeting = null;
@@ -78,6 +79,7 @@ function showMeetingScreen() {
     $("grid-screen").style.display = "block";
     $("meetingIdDisplay").innerText = MEETING_ID;
     $("freqDisplay").innerText = FREQ !== null ? FREQ + " ms" : "none (observe only)";
+    $("showMessagesDisplay").innerText = SHOW_MESSAGES ? "Yes" : "No (Metrics Only)";
 }
 
 // ─── Meeting Init ─────────────────────────────────────────────────────────────
@@ -133,24 +135,34 @@ function startMeeting(token, meetingId) {
         bytesRecvThisSecond += byteSize;
         totalBytesRecv += byteSize;
 
-        // Display in chat if it looks like a chat message (not a load-test payload)
-        let isChat = false;
-        try {
-            const parsed = JSON.parse(payload);
-            if (parsed.type !== "LOAD_TEST") isChat = true;
-            if (parsed.type === "CHAT") appendChatMsg(from, parsed.text || payload);
-        } catch {
-            isChat = true; // plain string = treat as chat
+        // Print received messages only if SHOW_MESSAGES flag is true
+        if (SHOW_MESSAGES) {
+            appendChatMsg(from, payload);
         }
-        if (isChat && !payload.startsWith("{")) appendChatMsg(from, payload);
     });
 }
+
+const MAX_CHAT_MESSAGES = 20;
 
 function appendChatMsg(from, text) {
     const box = $("chatMessages");
     if (!box) return;
-    const sender = meeting.participants.get(from)?.displayName || from;
-    box.innerHTML += `<div><b>${sender}:</b> ${text}</div>`;
+
+    const sender = (meeting && meeting.participants.get(from)) ? meeting.participants.get(from).displayName : from;
+    const displayMsg = typeof text === "object" ? JSON.stringify(text) : text;
+
+    // Create new message element
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "msg-item";
+    msgDiv.innerHTML = `<span style="color:#666;font-size:11px">[${new Date().toLocaleTimeString()}]</span> <b>${sender}:</b> ${displayMsg}`;
+
+    box.appendChild(msgDiv);
+
+    // Keep only the most recent MAX_CHAT_MESSAGES
+    while (box.children.length > MAX_CHAT_MESSAGES) {
+        box.removeChild(box.firstChild);
+    }
+
     box.scrollTop = box.scrollHeight;
 }
 
@@ -162,7 +174,7 @@ async function sendChatMessage() {
 
     try {
         await meeting.send(JSON.stringify({ type: "CHAT", text: msg }), {
-            reliability: VideoSDK.Constants.reliabilityMode.RELIABLE,
+            reliability: VideoSDK.Constants.reliabilityMode.UNRELIABLE,
         });
         totalMsgSent++;
         appendChatMsg("me", msg);
